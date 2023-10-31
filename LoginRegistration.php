@@ -176,7 +176,10 @@ class LoginRegistration extends DBConnection
             $data .= ",`type` = '{$type}'";
 
             // UPDATE Query Statement
-            $sql = "UPDATE `user_list` set {$data} where `user_id` = '{$user_id}";
+            $sql = "UPDATE `user_list` SET ";
+            $sql .= "`status` = '{$status}', "; // Assuming $status is sanitized to prevent SQL injection
+            $sql .= "`type` = '{$type}' ";
+            $sql .= "WHERE `user_id` = '{$user_id}'";
 
             // Executing update Query
             $update = $this->query($sql);

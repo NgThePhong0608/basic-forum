@@ -1,17 +1,8 @@
 <?php
-// /** Create DB Folder if not existing yet */
-// if(!is_dir(__DIR__.'./db'))
-//     mkdir(__DIR__.'./db');
-// /** Define DB File Path */
-// if(!defined('db_file')) define('db_file',__DIR__.'./db/forum_db.db');
-// /** Define DB File Path */
-// if(!defined('tZone')) define('tZone',"Asia/Manila");
-// if(!defined('dZone')) define('dZone',ini_get('date.timezone'));
-
-define('db_host', 'localhost'); // Change to your MariaDB server hostname
-define('db_user', 'root');  // Change to your MariaDB username
-define('db_pass', '');  // Change to your MariaDB password
-define('db_name', 'blog_db'); // Change to the name of your MariaDB database
+define('db_host', 'localhost');
+define('db_user', 'root');
+define('db_pass', '');
+define('db_name', 'blog_db');
 
 /** DB Connection Class */
 class DBConnection extends mysqli
@@ -27,7 +18,6 @@ class DBConnection extends mysqli
             die("Connection failed: " . $this->connect_error);
         }
 
-        // Enable foreign key support (if your MariaDB version supports it)
         $this->query("SET foreign_key_checks = 1;");
 
         $this->query("SET FOREIGN_KEY_CHECKS = 1;");
@@ -71,3 +61,9 @@ class DBConnection extends mysqli
 }
 
 $conn = new DBConnection();
+
+if (!$conn) {
+    die("Connection failed: " . $conn->connect_error);
+} else {
+    echo "Connected successfully";
+}

@@ -1,17 +1,19 @@
-<?php 
-if(!isset($_GET['id']) || (isset($_GET['id']) && $_GET['id'] <= 0)){
-    throw new ErrorException("Error: ". $conn->lastErrorMsg());
+<?php
+if (!isset($_GET['id']) || (isset($_GET['id']) && $_GET['id'] <= 0)) {
+    throw new ErrorException("Error: " . $conn->lastErrorMsg());
     exit;
 }
 $sql = "SELECT `user_id`, `fullname`, `username`, `status`, `type` FROM `user_list` where `user_id` = '{$_GET['id']}' ";
-$query = $conn->query($sql);
-$data = $query->fetchArray();
-if(empty($data)){
-    throw new ErrorException("Error: ". $conn->lastErrorMsg());
+$query = $conn->prepare($sql);
+$query->execute();
+$results = $query->get_result();
+$data = $results->fetch_assoc();
+if (empty($data)) {
+    throw new ErrorException("Error: " . $conn->lastErrorMsg());
     exit;
 }
 // Generate Manage User Form Token
-$_SESSION['formToken']['manage_user'] = password_hash(uniqid(),PASSWORD_DEFAULT);
+$_SESSION['formToken']['manage_user'] = password_hash(uniqid(), PASSWORD_DEFAULT);
 ?>
 <h1 class="text-center fw-bolder">Manage User</h1>
 <hr class="mx-auto opacity-100" style="width:50px;height:3px">
@@ -56,34 +58,34 @@ $_SESSION['formToken']['manage_user'] = password_hash(uniqid(),PASSWORD_DEFAULT)
     </div>
 </div>
 <script>
-    $(function(){
-        $('#update-user').submit(function(e){
+    $(function() {
+        $('#update-user').submit(function(e) {
             e.preventDefault();
             $('.pop_msg').remove()
             var _this = $(this)
             var _el = $('<div>')
-                _el.addClass('pop_msg')
-            _this.find('button').attr('disabled',true)
+            _el.addClass('pop_msg')
+            _this.find('button').attr('disabled', true)
             $.ajax({
-                url:'./LoginRegistration.php?a=update_user',
-                method:'POST',
-                data:$(this).serialize(),
-                dataType:'JSON',
-                error:err=>{
+                url: './LoginRegistration.php?a=update_user',
+                method: 'POST',
+                data: $(this).serialize(),
+                dataType: 'JSON',
+                error: err => {
                     console.log(err)
                     _el.addClass('alert alert-danger')
                     _el.text("An error occurred.")
                     _this.prepend(_el)
                     _el.show('slow')
-                    _this.find('button').attr('disabled',false)
+                    _this.find('button').attr('disabled', false)
                 },
-                success:function(resp){
-                    if(resp.status == 'success'){
+                success: function(resp) {
+                    if (resp.status == 'success') {
                         _el.addClass('alert alert-success')
                         setTimeout(() => {
                             location.replace("./?page=users");
                         }, 2000);
-                    }else{
+                    } else {
                         _el.addClass('alert alert-danger')
                     }
                     _el.text(resp.msg)
@@ -91,7 +93,7 @@ $_SESSION['formToken']['manage_user'] = password_hash(uniqid(),PASSWORD_DEFAULT)
                     _el.hide()
                     _this.prepend(_el)
                     _el.show('slow')
-                    _this.find('button').attr('disabled',false)
+                    _this.find('button').attr('disabled', false)
                 }
             })
         })

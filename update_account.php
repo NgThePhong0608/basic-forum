@@ -1,13 +1,16 @@
-<?php 
+<?php
 $sql = "SELECT `user_id`, `fullname`, `username`, `status`, `type` FROM `user_list` where `user_id` = '{$_SESSION['user_id']}' ";
-$query = $conn->query($sql);
-$data = $query->fetchArray();
-if(empty($data)){
-    throw new ErrorException("Error: ". $conn->lastErrorMsg());
+// $query = $conn->query($sql);
+$stmt = $conn->prepare($sql);
+$stmt->execute();
+$result = $stmt->get_result();
+$data = $result->fetch_assoc();
+if (empty($data)) {
+    throw new ErrorException("Error: " . $conn->lastErrorMsg());
     exit;
 }
 // Generate Manage User Form Token
-$_SESSION['formToken']['account-form'] = password_hash(uniqid(),PASSWORD_DEFAULT);
+$_SESSION['formToken']['account-form'] = password_hash(uniqid(), PASSWORD_DEFAULT);
 ?>
 <h1 class="text-center fw-bolder">Change Password</h1>
 <hr class="mx-auto opacity-100" style="width:50px;height:3px">
@@ -41,20 +44,20 @@ $_SESSION['formToken']['account-form'] = password_hash(uniqid(),PASSWORD_DEFAULT
     </div>
 </div>
 <script>
-    $(function(){
-        $('#update-password').submit(function(e){
+    $(function() {
+        $('#update-password').submit(function(e) {
             e.preventDefault();
             $('.pop_msg').remove()
             var _this = $(this)
             var _el = $('<div>')
-                _el.addClass('pop_msg')
+            _el.addClass('pop_msg')
             start_loader()
             $.ajax({
-                url:'./LoginRegistration.php?a=update_password',
-                method:'POST',
-                data:$(this).serialize(),
-                dataType:'JSON',
-                error:err=>{
+                url: './LoginRegistration.php?a=update_password',
+                method: 'POST',
+                data: $(this).serialize(),
+                dataType: 'JSON',
+                error: err => {
                     console.log(err)
                     _el.addClass('alert alert-danger')
                     _el.text("An error occurred.")
@@ -62,11 +65,11 @@ $_SESSION['formToken']['account-form'] = password_hash(uniqid(),PASSWORD_DEFAULT
                     _el.show('slow')
                     end_loader()
                 },
-                success:function(resp){
-                    if(resp.status == 'success'){
+                success: function(resp) {
+                    if (resp.status == 'success') {
                         location.reload();
                         return false;
-                    }else{
+                    } else {
                         _el.addClass('alert alert-danger')
                     }
                     _el.text(resp.msg)

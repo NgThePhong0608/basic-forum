@@ -1,6 +1,9 @@
-<?php 
-$sql = "SELECT `user_id`, `fullname`, `username`, `status`, `type` FROM `user_list` where `user_id` NOT IN (1, {$_SESSION['user_id']})";
-$query = $conn->query($sql);
+<?php
+require_once './DBConnection.php';
+$sql = "SELECT `user_id`, `fullname`, `username`, `status`, `type` FROM `user_list` WHERE `user_id` NOT IN (1, ?)";
+$query = $conn->prepare($sql);
+$query->bind_param("i", $_SESSION['user_id']);
+$query->execute();
 ?>
 <h1 class="text-center fw-bolder">User List</h1>
 <hr class="mx-auto opacity-100" style="width:50px;height:3px">
@@ -29,29 +32,33 @@ $query = $conn->query($sql);
                         </tr>
                     </thead>
                     <tbody>
-                        <?php while($row = $query->fetchArray()): ?>
-                            <tr>
-                                <td class="text-center"><?= $row['user_id'] ?></td>
-                                <td><?= $row['fullname'] ?></td>
-                                <td><?= $row['username'] ?></td>
-                                <td>
-                                    <?php 
-                                    switch($row['type']){
-                                        case 1:
-                                            echo 'Administrator';
-                                            break;
-                                        case 2:
-                                            echo 'User';
-                                            break;
-                                        default:
-                                            echo "N/A";
-                                            break;
-                                    }
-                                    ?>
-                                </td>
-                                <td class="text-center">
-                                    <?php 
-                                        switch($row['status']){
+                        <?php
+                        $results = $query->get_result();
+                        if ($results) :
+                            while ($row = $results->fetch_assoc()) :
+                        ?>
+                                <tr>
+                                    <td class="text-center"><?= $row['user_id'] ?></td>
+                                    <td><?= $row['fullname'] ?></td>
+                                    <td><?= $row['username'] ?></td>
+                                    <td>
+                                        <?php
+                                        switch ($row['type']) {
+                                            case 1:
+                                                echo 'Administrator';
+                                                break;
+                                            case 2:
+                                                echo 'User';
+                                                break;
+                                            default:
+                                                echo "N/A";
+                                                break;
+                                        }
+                                        ?>
+                                    </td>
+                                    <td class="text-center">
+                                        <?php
+                                        switch ($row['status']) {
                                             case 0:
                                                 echo "<small class='text-body-tertiary'>Pending</small>";
                                                 break;
@@ -65,17 +72,22 @@ $query = $conn->query($sql);
                                                 echo "<small class='text-danger'>Blocked</small>";
                                                 break;
                                         }
-                                    ?>
+                                        ?>
 
-                                </td>
-                                <td class="text-center">
-                                    <div class="btn-group btn-group-sm">
-                                        <a href="./?page=manage_user&id=<?= $row['user_id'] ?>" class="btn btn-sm btn-primary rounded-0">Manage</a>
-                                    </div>
-                                </td>
-                            </tr>
-                        <?php endwhile; ?>
-                        <?php if(!$query->fetchArray()): ?>
+                                    </td>
+                                    <td class="text-center">
+                                        <div class="btn-group btn-group-sm">
+                                            <a href="./?page=manage_user&id=<?= $row['user_id'] ?>" class="btn btn-sm btn-primary rounded-0">Manage</a>
+                                        </div>
+                                    </td>
+                                </tr>
+                        <?php
+                            endwhile;
+                        endif;
+                        ?>
+                        <?php
+                        if ($results->num_rows === 0) :
+                        ?>
                             <tr>
                                 <td colspan="6" class="text-center">No data found.</td>
                             </tr>
